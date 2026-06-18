@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDC Master Explorer (Classes & Tables)</title>
+    <style>
+        /* Modern Apple-style Glassmorphism */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            
+            /* Theme Colors for Classes vs Tables */
+            --class-color: #6366f1; /* Indigo */
+            --class-light: #a5b4fc;
+            --table-color: #10b981; /* Emerald Green */
+            --table-light: #6ee7b7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        /* Fixed Floating Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 18px 12px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Premium Select Picker */
+        .picker-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            border: 1px solid var(--glass-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            margin-bottom: 12px;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .picker-select:focus {
+            border-color: var(--class-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        optgroup {
+            background: #1e293b;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        option {
+            background: #0f172a;
+            color: #fff;
+        }
+
+        /* Search Input */
+        .search-box {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--class-color);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .search-box::placeholder { color: #64748b; }
+
+        /* Unified Card Styles */
+        .ddc-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Class vs Table Theme Switcher */
+        .ddc-card[data-type="class"] .card-header {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--class-light);
+            border-left: 4px solid var(--class-color);
+        }
+
+        .ddc-card[data-type="table"] .card-header {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--table-light);
+            border-left: 4px solid var(--table-color);
+        }
+
+        .card-header {
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .item-row {
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .item-row:last-child { border-bottom: none; }
+
+        .item-code {
+            font-family: monospace;
+            font-weight: 700;
+            min-width: 45px;
+        }
+
+        .ddc-card[data-type="class"] .item-code { color: #38bdf8; }
+        .ddc-card[data-type="table"] .item-code { color: #34d399; }
+
+        .item-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+
+        /* Search Match Highlights */
+        .highlight-class { background: rgba(99, 102, 241, 0.15) !important; }
+        .highlight-table { background: rgba(16, 185, 129, 0.15) !important; }
+        .hide { display: none !important; }
+
+        /* Quick Filter Chips */
+        .chips-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            color: #cbd5e1;
+            cursor: pointer;
+        }
+
+        .chip.active {
+            background: var(--class-color);
+            color: white;
+            border-color: var(--class-light);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>DDC Master Explorer</h1>
+        
+        <div class="chips-container" id="quickFilters">
+            <div class="chip active" onclick="setFilter('ALL')">All</div>
+            <div class="chip" onclick="setFilter('class')">Main Classes (000-900)</div>
+            <div class="chip" onclick="setFilter('table')">Tables (T1-T6)</div>
+        </div>
+
+        <select class="picker-select" id="mainDial" onchange="handleDial()">
+            <option value="ALL">အုပ်စုအားလုံး (Show All)</option>
+            
+            <optgroup label="--- 📚 Main Classes (ပင်မဘာသာရပ်များ) ---">
+                <option value="000">000 General Works (အထွေထွေ)</option>
+                <option value="100">100 Philosophy (ဒဿနိကဗေဒ)</option>
+                <option value="200">200 Religion (ဘာသာရေး)</option>
+                <option value="300">300 Social Sciences (လူမှုသိပ္ပံ)</option>
+                <option value="400">400 Language (ဘာသာစကား)</option>
+                <option value="500">500 Pure Science (သဘာဝသိပ္ပံ)</option>
+                <option value="600">600 Technology (နည်းပညာ)</option>
+                <option value="700">700 Arts & Recreation (အနုပညာ)</option>
+                <option value="800">800 Literature (စာပေ)</option>
+                <option value="900">900 History & Geog (သမိုင်း)</option>
+            </optgroup>
+
+            <optgroup label="--- 🛠️ Auxiliary Tables (အကူဇယားများ) ---">
+                <option value="T1">Table 1: Standard Subdivisions</option>
+                <option value="T2">Table 2: Geographic Areas</option>
+                <option value="T3">Table 3: Arts & Literatures</option>
+                <option value="T4">Table 4: Language Subdivisions</option>
+                <option value="T5">Table 5: Ethnic & National Groups</option>
+                <option value="T6">Table 6: Languages</option>
+            </optgroup>
+        </select>
+
+        <input type="text" class="search-box" id="keywordSearch" placeholder="နံပါတ် သို့မဟုတ် အကြောင်းအရာ ရှာဖွေရန်...">
+    </header>
+
+    <div id="displayEngine"></div>
+</div>
+
+<script>
+    // Unified Database: Classes (000-900) + Tables (T1-T6)
+    const masterData = [
+        // --- DDC TABLES (T1 to T6) ---
+        {
+            type: "table", code: "T1", title: "Table 1: Standard Subdivisions (ပုံစံခွဲများ)",
+            items: [
+                { code: "-01", text: "Philosophy and theory (ဒဿနနှင့် သီအိုရီ)" },
+                { code: "-02", text: "Miscellany (အထွေထွေရေးရာများ)" },
+                { code: "-03", text: "Dictionaries, encyclopedias (အဘိဓာန်၊ စွယ်စုံကျမ်း)" },
+                { code: "-05", text: "Serial publications (မဂ္ဂဇင်း၊ ဂျာနယ်)" },
+                { code: "-07", text: "Education, research (ပညာရေးနှင့် သုတေသန)" },
+                { code: "-09", text: "Historical, geographic treatment (သမိုင်းကြောင်းနှင့် ဒေသဆိုင်ရာ)" }
+            ]
+        },
+        {
+            type: "table", code: "T2", title: "Table 2: Geographic Areas (နေရာဒေသများ)",
+            items: [
+                { code: "-1", text: "Areas, regions, places in general (ယေဘုယျဒေသများ)" },
+                { code: "-3", text: "Ancient world (ရှေးဟောင်းကမ္ဘာ)" },
+                { code: "-4", text: "Europe (ဥရောပ)" },
+                { code: "-5", text: "Asia (အာရှတိုက်)" },
+                { code: "-59", text: "Southeast Asia (အရှေ့တောင်အာရှ)" },
+                { code: "-591", text: "Myanmar / Burma (မြန်မာနိုင်ငံ)" },
+                { code: "-7", text: "North America (မြောက်အမေရိက)" },
+                { code: "-73", text: "United States (အမေရိကန်ပြည်ထောင်စု)" }
+            ]
+        },
+        {
+            type: "table", code: "T3", title: "Table 3: Subdivisions for Arts & Literatures (စာပေပုံစံများ)",
+            items: [
+                { code: "-1", text: "Poetry (ကဗျာ)" },
+                { code: "-2", text: "Drama (ပြဇာတ်)" },
+                { code: "-3", text: "Fiction (ဝတ္ထု)" },
+                { code: "-4", text: "Essays (အက်ဆေး)" },
+                { code: "-5", text: "Speeches (မိန့်ခွန်းများ)" },
+                { code: "-8", text: "Miscellaneous writings (အခြားစာပေအရေးအသားများ)" }
+            ]
+        },
+        {
+            type: "table", code: "T4", title: "Table 4: Subdivisions of Individual Languages (ဘာသာစကားသဒ္ဒါခွဲများ)",
+            items: [
+                { code: "-1", text: "Writing systems and phonology (အရေးအသားစနစ်နှင့် သဒ္ဒဗေဒ)" },
+                { code: "-3", text: "Dictionaries (အဘိဓာန်များ)" },
+                { code: "-5", text: "Grammar (သဒ္ဒါကျမ်းများ)" },
+                { code: "-8", text: "Standard usage (စံပြုအသုံးအနှုန်းများ)" }
+            ]
+        },
+        {
+            type: "table", code: "T5", title: "Table 5: Ethnic Actions, National Groups (လူမျိုးစုများ)",
+            items: [
+                { code: "-1", text: "North Americans (မြောက်အမေရိကလူမျိုးများ)" },
+                { code: "-2", text: "British, English (ဗြိတိသျှလူမျိုးများ)" },
+                { code: "-95", text: "Asians (အာရှလူမျိုးများ)" },
+                { code: "-958", text: "Burmese / Myanmar people (မြန်မာလူမျိုး)" }
+            ]
+        },
+        {
+            type: "table", code: "T6", title: "Table 6: Languages (ဘာသာစကားများ)",
+            items: [
+                { code: "-1", text: "Indo-European languages (အင်ဒို-ဥရောပ ဘာသာစကားများ)" },
+                { code: "-2", text: "English and Old English (အင်္ဂလိပ်ဘာသာစကား)" },
+                { code: "-91", text: "Other Indo-European (Pali, Sanskrit) (ပါဠိ၊ သက္ကတ၊ ဟိန္ဒီ)" },
+                { code: "-95", text: "Asian languages (အာရှဘာသာစကားများ)" },
+                { code: "-958", text: "Burmese language (မြန်မာဘာသာစကား)" }
+            ]
+        },
+
+        // --- MAIN CLASSES (000 to 900) ---
+        {
+            type: "class", code: "000", title: "Computer science & general works",
+            items: [
+                { code: "000", text: "Computer science, knowledge & systems" },
+                { code: "020", text: "Library & information sciences" },
+                { code: "030", text: "General encyclopedias" },
+                { code: "070", text: "News media, journalism & publishing" }
+            ]
+        },
+        {
+            type: "class", code: "100", title: "Philosophy & Psychology",
+            items: [
+                { code: "100", text: "Philosophy & psychology" },
+                { code: "150", text: "Psychology" },
+                { code: "170", text: "Ethics / Moral philosophy" }
+            ]
+        },
+        {
+            type: "class", code: "200", title: "Religion",
+            items: [
+                { code: "200", text: "Religion" },
+                { code: "220", text: "Bible" },
+                { code: "290", text: "Other religions (Buddhism, Hinduism, Islam)" }
+            ]
+        },
+        {
+            type: "class", code: "300", title: "Social Sciences",
+            items: [
+                { code: "300", text: "Social sciences" },
+                { code: "320", text: "Political science" },
+                { code: "330", text: "Economics" },
+                { code: "340", text: "Law" },
+                { code: "370", text: "Education" }
+            ]
+        },
+        {
+            type: "class", code: "400", title: "Language",
+            items: [
+                { code: "400", text: "Language" },
+                { code: "410", text: "Linguistics" },
+                { code: "420", text: "English language" },
+                { code: "490", text: "Other languages (Pali, Myanmar)" }
+            ]
+        },
+        {
+            type: "class", code: "500", title: "Pure Science",
+            items: [
+                { code: "500", text: "Natural sciences & mathematics" },
+                { code: "510", text: "Mathematics" },
+                { code: "530", text: "Physics" },
+                { code: "570", text: "Biology / Life sciences" }
+            ]
+        },
+        {
+            type: "class", code: "600", title: "Technology",
+            items: [
+                { code: "600", text: "Technology" },
+                { code: "610", text: "Medicine & health" },
+                { code: "620", text: "Engineering" },
+                { code: "650", text: "Management & PR" }
+            ]
+        },
+        {
+            type: "class", code: "700", title: "Arts & Recreation",
+            items: [
+                { code: "700", text: "The arts" },
+                { code: "720", text: "Architecture" },
+                { code: "780", text: "Music" },
+                { code: "790", text: "Sports & Performing arts" }
+            ]
+        },
+        {
+            type: "class", code: "800", title: "Literature",
+            items: [
+                { code: "800", text: "Literature" },
+                { code: "810", text: "American literature" },
+                { code: "820", text: "English literature" },
+                { code: "890", text: "Other literatures (Myanmar Fiction)" }
+            ]
+        },
+        {
+            type: "class", code: "900", title: "History & Geography",
+            items: [
+                { code: "900", text: "History & geography" },
+                { code: "910", text: "Geography & travel" },
+                { code: "920", text: "Biography" },
+                { code: "950", text: "Asia history (History of Myanmar)" }
+            ]
+        }
+    ];
+
+    const engine = document.getElementById('displayEngine');
+    let currentGlobalFilter = 'ALL';
+
+    function renderMasterUI() {
+        engine.innerHTML = masterData.map(group => `
+            <div class="ddc-card" id="card-${group.code}" data-code="${group.code}" data-type="${group.type}">
+                <div class="card-header">
+                    <span class="badge">${group.code}</span>
+                    <span>${group.title}</span>
+                </div>
+                <div class="items-list">
+                    ${group.items.map(item => `
+                        <div class="item-row" data-search="${item.code} ${item.text.toLowerCase()}">
+                            <span class="item-code">${item.code}</span>
+                            <span class="item-text">${item.text}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Filter Logic (Chips + Select Dial)
+    function setFilter(type) {
+        currentGlobalFilter = type;
+        
+        // Update Chips UI
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Reset Dropdown & Search
+        document.getElementById('mainDial').value = "ALL";
+        document.getElementById('keywordSearch').value = "";
+        
+        applyFilters();
+    }
+
+    function handleDial() {
+        document.getElementById('keywordSearch').value = "";
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const dialValue = document.getElementById('mainDial').value;
+        const cards = document.querySelectorAll('.ddc-card');
+
+        cards.forEach(card => {
+            const cardCode = card.getAttribute('data-code');
+            const cardType = card.getAttribute('data-type');
+            
+            // Reset Highlights
+            card.querySelectorAll('.item-row').forEach(row => {
+                row.classList.remove('highlight-class', 'highlight-table', 'hide');
+            });
+
+            // Logic matching
+            let show = true;
+            if (currentGlobalFilter !== 'ALL' && cardType !== currentGlobalFilter) show = false;
+            if (dialValue !== 'ALL' && cardCode !== dialValue) show = false;
+
+            if (show) card.classList.remove('hide');
+            else card.classList.add('hide');
+        });
+    }
+
+    // Global Search Engine
+    document.getElementById('keywordSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.ddc-card');
+
+        if (query === "") {
+            applyFilters(); // fallback to current filters
+            return;
+        }
+
+        cards.forEach(card => {
+            const type = card.getAttribute('data-type');
+            const items = card.querySelectorAll('.item-row');
+            let hasMatch = false;
+
+            // Check if card honors current global tab filter
+            if (currentGlobalFilter !== 'ALL' && type !== currentGlobalFilter) {
+                card.classList.add('hide');
+                return;
+            }
+
+            items.forEach(item => {
+                const searchData = item.getAttribute('data-search');
+                if (searchData.includes(query)) {
+                    item.classList.remove('hide');
+                    item.classList.add(type === 'class' ? 'highlight-class' : 'highlight-table');
+                    hasMatch = true;
+                } else {
+                    item.classList.add('hide');
+                    item.classList.remove('highlight-class', 'highlight-table');
+                }
+            });
+
+            if (hasMatch) card.classList.remove('hide');
+            else card.classList.add('hide');
+        });
+    });
+
+    renderMasterUI();
+</script>
+
+</body>
+</html>
