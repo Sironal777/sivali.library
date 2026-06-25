@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDC Master Explorer (Classes & Tables)</title>
+    <title>Library Master Explorer (DDC, MARC & ISBD)</title>
     <style>
-        /* Modern Apple-style Glassmorphism */
+        /* Modern Apple-style Glassmorphism & Enhanced UI */
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -13,11 +13,13 @@
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             
-            /* Theme Colors for Classes vs Tables */
+            /* Theme Colors for Categories */
             --class-color: #6366f1; /* Indigo */
             --class-light: #a5b4fc;
             --table-color: #10b981; /* Emerald Green */
             --table-light: #6ee7b7;
+            --note-color: #f59e0b;  /* Amber / Orange */
+            --note-light: #fcd34d;
         }
 
         * {
@@ -34,10 +36,11 @@
             color: var(--text-primary);
             padding: 16px;
             min-height: 100vh;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 650px;
+            max-width: 700px;
             margin: 0 auto;
             padding-bottom: 50px;
         }
@@ -47,23 +50,23 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            padding: 18px 12px;
+            padding: 20px 16px;
             border-bottom: 1px solid var(--glass-border);
-            margin-bottom: 20px;
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 24px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.6);
         }
 
         h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             letter-spacing: -0.5px;
-            background: linear-gradient(to right, #ffffff, #94a3b8);
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -71,46 +74,39 @@
         /* Premium Select Picker */
         .picker-select {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             color: #fff;
             border: 1px solid var(--glass-border);
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
             font-size: 0.95rem;
             font-weight: 500;
             outline: none;
             cursor: pointer;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
+            background-position: right 1.2rem center;
+            background-size: 1.2em;
+            transition: all 0.3s ease;
         }
 
         .picker-select:focus {
             border-color: var(--class-color);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
         }
 
-        optgroup {
-            background: #1e293b;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        option {
-            background: #0f172a;
-            color: #fff;
-        }
+        optgroup { background: #1e293b; color: #94a3b8; font-weight: 600; }
+        option { background: #0f172a; color: #fff; padding: 10px; }
 
         /* Search Input */
         .search-box {
             width: 100%;
-            padding: 14px 16px;
+            padding: 16px 20px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            border-radius: 14px;
             color: var(--text-primary);
             font-size: 1rem;
             outline: none;
@@ -120,126 +116,188 @@
         .search-box:focus {
             border-color: var(--class-color);
             background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
         .search-box::placeholder { color: #64748b; }
+
+        /* Quick Filter Chips */
+        .chips-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .chips-container::-webkit-scrollbar { display: none; } /* Chrome */
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chip:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .chip.active[data-target="ALL"] { background: #ffffff; color: #0f172a; border-color: #ffffff; }
+        .chip.active[data-target="class"] { background: var(--class-color); color: white; border-color: var(--class-light); }
+        .chip.active[data-target="table"] { background: var(--table-color); color: white; border-color: var(--table-light); }
+        .chip.active[data-target="note"] { background: var(--note-color); color: white; border-color: var(--note-light); }
 
         /* Unified Card Styles */
         .ddc-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(12px);
-            border-radius: 16px;
-            margin-bottom: 14px;
+            border-radius: 18px;
+            margin-bottom: 20px;
             overflow: hidden;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        /* Class vs Table Theme Switcher */
+        .ddc-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Category Theme Switcher */
         .ddc-card[data-type="class"] .card-header {
-            background: rgba(99, 102, 241, 0.1);
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), transparent);
             color: var(--class-light);
-            border-left: 4px solid var(--class-color);
+            border-left: 5px solid var(--class-color);
         }
-
         .ddc-card[data-type="table"] .card-header {
-            background: rgba(16, 185, 129, 0.1);
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), transparent);
             color: var(--table-light);
-            border-left: 4px solid var(--table-color);
+            border-left: 5px solid var(--table-color);
+        }
+        .ddc-card[data-type="note"] .card-header {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), transparent);
+            color: var(--note-light);
+            border-left: 5px solid var(--note-color);
         }
 
         .card-header {
-            padding: 16px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
         .badge {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
             letter-spacing: 0.5px;
+            font-weight: bold;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
         }
 
         .item-row {
-            padding: 12px 16px;
+            padding: 16px 20px;
             display: flex;
             align-items: flex-start;
             gap: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.2s ease;
+        }
+
+        .item-row:hover {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .item-row:last-child { border-bottom: none; }
 
         .item-code {
-            font-family: monospace;
-            font-weight: 700;
-            min-width: 45px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 800;
+            font-size: 1rem;
+            min-width: 50px;
+            padding-top: 2px;
         }
 
-        .ddc-card[data-type="class"] .item-code { color: #38bdf8; }
+        .ddc-card[data-type="class"] .item-code { color: #818cf8; }
         .ddc-card[data-type="table"] .item-code { color: #34d399; }
+        .ddc-card[data-type="note"] .item-code { color: #fbbf24; }
+
+        .item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
 
         .item-text {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: #e2e8f0;
+            font-size: 0.98rem;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+
+        .sub-note {
+            display: block;
+            font-size: 0.88rem;
+            color: #94a3b8;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 2px solid rgba(255,255,255,0.1);
+            line-height: 1.6;
+        }
+
+        .sub-note strong {
+            color: #cbd5e1;
+            font-family: monospace;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
         }
 
         /* Search Match Highlights */
-        .highlight-class { background: rgba(99, 102, 241, 0.15) !important; }
-        .highlight-table { background: rgba(16, 185, 129, 0.15) !important; }
+        .highlight-class { background: rgba(99, 102, 241, 0.2) !important; }
+        .highlight-table { background: rgba(16, 185, 129, 0.2) !important; }
+        .highlight-note { background: rgba(245, 158, 11, 0.2) !important; }
         .hide { display: none !important; }
 
-        /* Quick Filter Chips */
-        .chips-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .chip {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            color: #cbd5e1;
-            cursor: pointer;
-        }
-
-        .chip.active {
-            background: var(--class-color);
-            color: white;
-            border-color: var(--class-light);
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>DDC Master Explorer</h1>
+        <h1>📚 Library Master Explorer</h1>
         
         <div class="chips-container" id="quickFilters">
-            <div class="chip active" onclick="setFilter('ALL')">All</div>
-            <div class="chip" onclick="setFilter('class')">Main Classes (000-900)</div>
-            <div class="chip" onclick="setFilter('table')">Tables (T1-T6)</div>
+            <div class="chip active" data-target="ALL" onclick="setFilter('ALL')">🌐 အားလုံး (All)</div>
+            <div class="chip" data-target="class" onclick="setFilter('class')">📘 Main Classes</div>
+            <div class="chip" data-target="table" onclick="setFilter('table')">📗 Tables (T1-T6)</div>
+            <div class="chip" data-target="note" onclick="setFilter('note')">📙 စာကြည့်တိုက်လိုတိုရှင်းမှတ်စု</div>
         </div>
 
         <select class="picker-select" id="mainDial" onchange="handleDial()">
-            <option value="ALL">အုပ်စုအားလုံး (Show All)</option>
+            <option value="ALL">အုပ်စုအားလုံး ပြသရန် (Show All)</option>
             
-            <optgroup label="--- 📚 Main Classes (ပင်မဘာသာရပ်များ) ---">
+            <optgroup label="--- 📙 စာကြည့်တိုက်လိုတိုရှင်းမှတ်စု ---">
+                <option value="MARC">MARC နှင့် နံပါတ်တွဲစပ်ပုံ</option>
+                <option value="ISBD">ISBD သင်္ကေတအသုံးပြုနည်းများ</option>
+            </optgroup>
+
+            <optgroup label="--- 📘 Main Classes (ပင်မဘာသာရပ်များ) ---">
                 <option value="000">000 General Works (အထွေထွေ)</option>
                 <option value="100">100 Philosophy (ဒဿနိကဗေဒ)</option>
                 <option value="200">200 Religion (ဘာသာရေး)</option>
@@ -252,7 +310,7 @@
                 <option value="900">900 History & Geog (သမိုင်း)</option>
             </optgroup>
 
-            <optgroup label="--- 🛠️ Auxiliary Tables (အကူဇယားများ) ---">
+            <optgroup label="--- 📗 Auxiliary Tables (အကူဇယားများ) ---">
                 <option value="T1">Table 1: Standard Subdivisions</option>
                 <option value="T2">Table 2: Geographic Areas</option>
                 <option value="T3">Table 3: Arts & Literatures</option>
@@ -269,8 +327,41 @@
 </div>
 
 <script>
-    // Unified Database: Classes (000-900) + Tables (T1-T6)
     const masterData = [
+        // --- LIBRARY QUICK NOTES (လိုတိုရှင်းမှတ်စု) ---
+        {
+            type: "note", code: "MARC", title: "MARC နှင့် နံပါတ်တွဲစပ်ပုံ",
+            items: [
+                { code: "020", text: "International Standard Book Number (ISBN)", subText: "<strong>$a</strong> - ISBN နံပါတ်<br><strong>$c</strong> - ဈေးနှုန်း (Terms of availability)<br><strong>$z</strong> - ပယ်ဖျက်ထားသော သို့မဟုတ် မှားယွင်းနေသော ISBN" },
+                { code: "041", text: "Language Code (ဘာသာစကားကုဒ်)", subText: "<strong>$a</strong> - စာအုပ်၏ အဓိကဘာသာစကား<br><strong>$h</strong> - မူရင်းဘာသာစကား" },
+                { code: "082", text: "Dewey Decimal Classification Number (DDC)", subText: "<strong>$a</strong> - ခွဲခြားသတ်မှတ်ထားသော နံပါတ်<br><strong>$b</strong> - စာအုပ်အမှတ် (Cutter number)<br><strong>$2</strong> - DDC Edition နံပါတ်" },
+                { code: "100", text: "Main Entry - Personal Name (ပင်မစာရေးသူ)", subText: "<strong>$a</strong> - အမည် (Personal name)<br><strong>$c</strong> - ဂုဏ်ပုဒ်များ (Titles/words associated)<br><strong>$d</strong> - ဖွား/သေ ခုနှစ်<br><strong>$e</strong> - ပါဝင်ပတ်သက်မှု (ဥပမာ- author, illustrator)<br><strong>$q</strong> - အမည်အပြည့်အစုံ" },
+                { code: "245", text: "Title Statement (ခေါင်းစဉ်)", subText: "<strong>$a</strong> - ပင်မခေါင်းစဉ်<br><strong>$b</strong> - ခေါင်းစဉ်ခွဲ (Subtitle)<br><strong>$c</strong> - တာဝန်ခံမှုဖော်ပြချက် (စာရေးသူ၊ ဘာသာပြန်သူ စသည်)<br><strong>$n</strong> - အပိုင်း/တွဲ နံပါတ်<br><strong>$p</strong> - အပိုင်း/တွဲ အမည်" },
+                { code: "250", text: "Edition Statement (မူအကြိမ်)", subText: "<strong>$a</strong> - မူအကြိမ် ဖော်ပြချက်<br><strong>$b</strong> - ကျန်ရှိသော မူအကြိမ်ဖော်ပြချက်" },
+                { code: "260", text: "Publication, Distribution, etc. (ပုံနှိပ်ထုတ်ဝေခြင်း)", subText: "<strong>$a</strong> - ထုတ်ဝေသည့် နေရာ<br><strong>$b</strong> - ထုတ်ဝေသူ / ပုံနှိပ်တိုက်<br><strong>$c</strong> - ထုတ်ဝေသည့် ခုနှစ်" },
+                { code: "264", text: "Production, Publication, Manufacture... (RDA စံနစ်)", subText: "<strong>$a</strong> - နေရာ<br><strong>$b</strong> - အမည်<br><strong>$c</strong> - ခုနှစ် (ထုတ်ဝေမှု သို့မဟုတ် မူပိုင်ခွင့်)" },
+                { code: "300", text: "Physical Description (ရုပ်ပိုင်းဆိုင်ရာ ဖော်ပြချက်)", subText: "<strong>$a</strong> - စာမျက်နှာ အရေအတွက် (Extent)<br><strong>$b</strong> - အခြားရုပ်ပိုင်းဆိုင်ရာ (illustrations, maps)<br><strong>$c</strong> - အရွယ်အစား (Dimensions)<br><strong>$e</strong> - ပူးတွဲပါဝင်သောပစ္စည်းများ" },
+                { code: "490", text: "Series Statement (စာစဉ်ဖော်ပြချက်)", subText: "<strong>$a</strong> - စာစဉ် အမည်<br><strong>$v</strong> - စာစဉ် အတွဲ/အမှတ်" },
+                { code: "500", text: "General Note", subText: "<strong>$a</strong> - အထွေထွေ မှတ်ချက်" },
+                { code: "504", text: "Bibliography Note", subText: "<strong>$a</strong> - ကျမ်းကိုးစာရင်း မှတ်ချက်" },
+                { code: "505", text: "Formatted Contents Note", subText: "<strong>$a</strong> - ဖော်ပြထားသော မာတိကာအကြောင်းအရာ" },
+                { code: "520", text: "Summary Note", subText: "<strong>$a</strong> - အနှစ်ချုပ် (Summary, abstract)" },
+                { code: "650", text: "Subject Added Entry (အကြောင်းအရာ/ဘာသာရပ်)", subText: "<strong>$a</strong> - အကြောင်းအရာ/ဘာသာရပ်<br><strong>$v</strong> - ပုံစံခွဲ (Form)<br><strong>$x</strong> - အထွေထွေခွဲခြားခြင်း<br><strong>$y</strong> - အချိန်ကာလခွဲခြားခြင်း<br><strong>$z</strong> - နေရာဒေသခွဲခြားခြင်း" },
+                { code: "700", text: "Added Entry - Personal Name (အခြားပါဝင်သူများ)", subText: "<strong>$a</strong> - အမည်<br><strong>$d</strong> - ဖွား/သေ ခုနှစ်<br><strong>$e</strong> - ပါဝင်ပတ်သက်မှု (translator, editor)" }
+            ]
+        },
+        {
+            type: "note", code: "ISBD", title: "ISBD သင်္ကေတအသုံးပြုနည်းများ",
+            items: [
+                { code: "/", text: "Slash (မျဉ်းစောင်း)", subText: "ခေါင်းစဉ်နဲ့ တာဝန်ခံမှု (Statement of responsibility) ကို ပိုင်းခြားရန်။<br><em>ဥပမာ - Hamlet / William Shakespeare.</em>" },
+                { code: ":", text: "Colon (ဝိသဇ္ဇနီ)", subText: "၁။ ခေါင်းစဉ်အကြီးနဲ့ ခေါင်းစဉ်ခွဲ (Subtitle) ကြား<br>၂။ ထုတ်ဝေတဲ့နေရာနဲ့ ထုတ်ဝေသူ ကြား<br>၃။ စာမျက်နှာအရေအတွက်နဲ့ သရုပ်ဖော်ပုံ ကြား" },
+                { code: ";", text: "Semicolon (ပုဒ်ခွဲ)", subText: "အမျိုးအစားမတူညီတဲ့ အချက်အလက်များကို ဆက်စပ်ရန်။<br>၁။ တာဝန်ခံမှု မတူညီသူများကို ခွဲရန် (by A ; translated by B)<br>၂။ နေရာ နှစ်ခုဖြစ်နေလျှင်<br>၃။ Physical Description တွင် အရွယ်အစား (cm) မလာခင်" },
+                { code: ",", text: "Comma (ပုဒ်ကလေး)", subText: "ထုတ်ဝေသူနဲ့ ခုနှစ် ကြားတွင် သုံးသည်။ စာရေးသူနာမည် နောက်လှန်ရေးရာတွင် သုံးသည်။<br><em>ဥပမာ - Beacon Press, 1993. | Shakespeare, William.</em>" },
+                { code: ".", text: "Period (ပုဒ်မ)", subText: "Tag တစ်ခု (သို့) Area တစ်ခု ပြီးဆုံးကြောင်း ပြရန်။ (MARC Tag အများစု၏ အဆုံးတွင် အမြဲပိတ်ပေးရသည်)" },
+                { code: "[ ]", text: "Square Brackets (ထောင့်ကွင်း)", subText: "စာအုပ် Title page တွင် တိုက်ရိုက်မပါဘဲ ပြင်ပမှ ရှာဖွေဖြည့်စွက်ထားသော အချက်အလက်များကို ပြရန်။<br><em>ဥပမာ - [1968]</em>" }
+            ]
+        },
+
         // --- DDC TABLES (T1 to T6) ---
         {
             type: "table", code: "T1", title: "Table 1: Standard Subdivisions (ပုံစံခွဲများ)",
@@ -297,18 +388,18 @@
             ]
         },
         {
-            type: "table", code: "T3", title: "Table 3: Subdivisions for Arts & Literatures (စာပေပုံစံများ)",
+            type: "table", code: "T3", title: "Table 3: Subdivisions for Arts & Literatures",
             items: [
                 { code: "-1", text: "Poetry (ကဗျာ)" },
                 { code: "-2", text: "Drama (ပြဇာတ်)" },
                 { code: "-3", text: "Fiction (ဝတ္ထု)" },
                 { code: "-4", text: "Essays (အက်ဆေး)" },
                 { code: "-5", text: "Speeches (မိန့်ခွန်းများ)" },
-                { code: "-8", text: "Miscellaneous writings (အခြားစာပေအရေးအသားများ)" }
+                { code: "-8", text: "Miscellaneous writings (အခြားစာပေများ)" }
             ]
         },
         {
-            type: "table", code: "T4", title: "Table 4: Subdivisions of Individual Languages (ဘာသာစကားသဒ္ဒါခွဲများ)",
+            type: "table", code: "T4", title: "Table 4: Language Subdivisions",
             items: [
                 { code: "-1", text: "Writing systems and phonology (အရေးအသားစနစ်နှင့် သဒ္ဒဗေဒ)" },
                 { code: "-3", text: "Dictionaries (အဘိဓာန်များ)" },
@@ -317,7 +408,7 @@
             ]
         },
         {
-            type: "table", code: "T5", title: "Table 5: Ethnic Actions, National Groups (လူမျိုးစုများ)",
+            type: "table", code: "T5", title: "Table 5: Ethnic & National Groups",
             items: [
                 { code: "-1", text: "North Americans (မြောက်အမေရိကလူမျိုးများ)" },
                 { code: "-2", text: "British, English (ဗြိတိသျှလူမျိုးများ)" },
@@ -330,7 +421,7 @@
             items: [
                 { code: "-1", text: "Indo-European languages (အင်ဒို-ဥရောပ ဘာသာစကားများ)" },
                 { code: "-2", text: "English and Old English (အင်္ဂလိပ်ဘာသာစကား)" },
-                { code: "-91", text: "Other Indo-European (Pali, Sanskrit) (ပါဠိ၊ သက္ကတ၊ ဟိန္ဒီ)" },
+                { code: "-91", text: "Other Indo-European (Pali, Sanskrit)" },
                 { code: "-95", text: "Asian languages (အာရှဘာသာစကားများ)" },
                 { code: "-958", text: "Burmese language (မြန်မာဘာသာစကား)" }
             ]
@@ -440,9 +531,12 @@
                 </div>
                 <div class="items-list">
                     ${group.items.map(item => `
-                        <div class="item-row" data-search="${item.code} ${item.text.toLowerCase()}">
+                        <div class="item-row" data-search="${item.code.toLowerCase()} ${item.text.toLowerCase()} ${item.subText ? item.subText.toLowerCase() : ''}">
                             <span class="item-code">${item.code}</span>
-                            <span class="item-text">${item.text}</span>
+                            <div class="item-content">
+                                <span class="item-text">${item.text}</span>
+                                ${item.subText ? `<span class="sub-note">${item.subText}</span>` : ''}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -456,7 +550,7 @@
         
         // Update Chips UI
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelector(`.chip[data-target="${type}"]`).classList.add('active');
         
         // Reset Dropdown & Search
         document.getElementById('mainDial').value = "ALL";
@@ -480,7 +574,7 @@
             
             // Reset Highlights
             card.querySelectorAll('.item-row').forEach(row => {
-                row.classList.remove('highlight-class', 'highlight-table', 'hide');
+                row.classList.remove('highlight-class', 'highlight-table', 'highlight-note', 'hide');
             });
 
             // Logic matching
@@ -499,7 +593,7 @@
         const cards = document.querySelectorAll('.ddc-card');
 
         if (query === "") {
-            applyFilters(); // fallback to current filters
+            applyFilters(); 
             return;
         }
 
@@ -518,11 +612,11 @@
                 const searchData = item.getAttribute('data-search');
                 if (searchData.includes(query)) {
                     item.classList.remove('hide');
-                    item.classList.add(type === 'class' ? 'highlight-class' : 'highlight-table');
+                    item.classList.add(`highlight-${type}`);
                     hasMatch = true;
                 } else {
                     item.classList.add('hide');
-                    item.classList.remove('highlight-class', 'highlight-table');
+                    item.classList.remove('highlight-class', 'highlight-table', 'highlight-note');
                 }
             });
 
